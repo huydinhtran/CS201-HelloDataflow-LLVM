@@ -1,6 +1,0 @@
-/home/huytran/CS201/HelloDataflow-LLVM/Pass/build/CMakeFiles/rebuild_cache.dir
-/home/huytran/CS201/HelloDataflow-LLVM/Pass/build/CMakeFiles/acc_gen.dir
-/home/huytran/CS201/HelloDataflow-LLVM/Pass/build/CMakeFiles/edit_cache.dir
-/home/huytran/CS201/HelloDataflow-LLVM/Pass/build/CMakeFiles/omp_gen.dir
-/home/huytran/CS201/HelloDataflow-LLVM/Pass/build/CMakeFiles/LLVMValueNumberingPass.dir
-/home/huytran/CS201/HelloDataflow-LLVM/Pass/build/CMakeFiles/intrinsics_gen.dir
