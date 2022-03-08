@@ -24,6 +24,8 @@ struct blockContent{
     llvm::BasicBlock* block;
     StringRef name;
     int blockId;
+    llvm::BasicBlock* pred;
+    llvm::BasicBlock* succ;
 };
 
 
@@ -53,7 +55,7 @@ namespace
         if (F.getName() != func_name)
             return;
 
-
+//////////////////////////////Implementing UEVar, VarKill//////////////////////////////
 
         for (auto &basic_block : F)
         {
@@ -61,6 +63,12 @@ namespace
             blockCon[blockCount].block = &basic_block;
             blockCon[blockCount].name = basic_block.getName();
             blockCon[blockCount].blockId = blockCount;
+            blockCon[blockCount].pred = basic_block.getSinglePredecessor();
+            blockCon[blockCount].succ = basic_block.getSingleSuccessor();
+            // errs() << blockCon[blockCount].pred << "\n";
+            // errs() << blockCon[blockCount].succ << "\n";
+            errs() << "2 PREDS? "<<basic_block.hasNPredecessors (2) << "\n";
+            
             errs() << blockCon[blockCount].blockId << "\n";
             errs() << blockCon[blockCount].block << "\n";
             errs() << blockCon[blockCount].name << "\n";
@@ -120,13 +128,18 @@ namespace
             }
         }
 
-        for(int i=blockCount ; i > 0 ; i--){
-            if (first == true){
-                first == false;
-            }
-            // blockCon[blockCount].liveOut =
 
-        }
+//////////////////////////////Implementing LiveOut//////////////////////////////
+        // for(int i=blockCount ; i > 0 ; i--){
+        //     if (first == true){
+        //         first == false;
+        //     }else{
+
+        //         blockCon[blockCount].liveOut =
+        //     }
+        //     // blockCon[blockCount].liveOut =
+
+        // }
 
 
 
