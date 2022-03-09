@@ -144,32 +144,41 @@ namespace
         //     errs() << "dest1    " << dest1[i] <<"\n";
         // }
 
+        // for(int j = (blockCount-1); j >= 0; j--){
+        //     // errs() << "Succ " << Succ->getName()<<"\n";
+        //     errs() << "block " << blockCon[j].name<<"\n";
+        //     errs() << "\n";
+        // }
 
         // int succLoop=0;
         // errs() << blockCon[2].name << "\n";
-        for (int i = blockCount; i > 0; i--){
+
+
+
+        errs() << "BLOCKCOUNT" <<blockCount << "\n";
+        for (int i = blockCount-1; i >= 0; i--){
             for (BasicBlock *Succ : successors(blockCon[i].block)) {
-                for(int j = 0; j < blockCount; j++){
-                    errs() << "Succ" << Succ<<"\n";
-                    errs() << "block" << blockCon[j].block<<"\n";
-                    errs() << "\n";
+                for(int j = 0; j < blockCount+1; j++){
+                    // errs() << "Succ " << Succ->getName()<<"\n";
+                    // errs() << "block " << blockCon[j].name<<"\n";
+                    // errs() << "\n";
                     if (Succ == blockCon[j].block){
                         std::vector<StringRef> kill_U_UE;
                         std::set_union(blockCon[j].varKill.begin(), blockCon[j].varKill.end(), blockCon[j].ueVar.begin(), blockCon[j].ueVar.end(),std::back_inserter(kill_U_UE));
-                        errs() << "print kill_U_UE" << "\n";
-                        for (auto k: kill_U_UE){
-                            errs() << k << ' ';
-                        }
+                        // errs() << "print kill_U_UE" << "\n";
+                        // for (auto k: kill_U_UE){
+                        //     errs() << k << " ";
+                        // }
                         std::vector<StringRef> out_diff;
                         std::set_difference(blockCon[j].liveOut.begin(), blockCon[j].liveOut.end(), kill_U_UE.begin(), kill_U_UE.end(),std::back_inserter(out_diff));
                         std::set_union(blockCon[i].liveOut.begin(), blockCon[i].liveOut.end(), out_diff.begin(), out_diff.end(),std::back_inserter(blockCon[i].liveOut));
                     }
                 }
                 // errs() << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << "\n";
-                // errs() << "liveOut:   " << blockCon[i].liveOut[0] << "\n";
+                // errs() << "liveOut:   " << blockCon[i].liveOut << "\n";
             }
         }
-
+        // errs() << "liveOut:   " << blockCon[0].liveOut[0] << "\n";
 
         // for (auto &basic_block : F)
         // {
@@ -186,6 +195,9 @@ namespace
         //         // // errs() << "varKill: " << blockCon[blockCount].varKill << "\n";
         //         // blockCount--;
         //     }
+        // }
+        // for (int i = 0; i< blockCount-1;i++){
+        //         errs() << blockCon[i].name << " LiveOut: " << blockCon[i].liveOut[0] << "\n";
         // }
 
 
