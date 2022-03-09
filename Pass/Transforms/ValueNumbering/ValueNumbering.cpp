@@ -1,3 +1,8 @@
+/*
+CS201 Compiler Construction - Project 3
+Group members: Huy Dinh Tran, Rajat Jain
+*/
+
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/Passes/PassPlugin.h"
 #include "llvm/Passes/PassBuilder.h"
@@ -6,6 +11,11 @@
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/IR/CFG.h"
 #include <set>
+#include <iostream>
+#include <vector>
+#include <iterator>
+#include <iomanip>
+#include <algorithm>
 
 using namespace std;
 
@@ -62,9 +72,6 @@ namespace
             blockCon[blockCount].name = basic_block.getName();
             blockCon[blockCount].blockId = blockCount;
             
-            errs() << blockCon[blockCount].blockId << "\n";
-            errs() << blockCon[blockCount].block << "\n";
-            errs() << blockCon[blockCount].name << "\n";
             for (auto &inst : basic_block)
             {
 
@@ -82,7 +89,6 @@ namespace
                         hTable[loadCount].var = var1;
                         hTable[loadCount].loadReg = loadCount;
                         hTable[loadCount].name = var1Name;
-                        errs() << formatv("{0,-40}", inst) << hTable[loadCount].name << " = " << hTable[loadCount].var << "\n";
                         loadCount++;
                     }
                 }
@@ -92,7 +98,6 @@ namespace
                     {
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
-                        errs() << formatv("{0,-40}", inst) << "UEVAR: " << hTable[loadCount-2].name << " " << hTable[loadCount-1].name << "\n";
                         ueVarCount += 2;
                         afterOp = true;
                     }
@@ -102,103 +107,63 @@ namespace
                     if(afterOp == true){
                         hTable[tableCount].var = var2;
                         hTable[tableCount].name = var2Name;
-                        blockCon[blockCount].varKill.insert(blockCon[blockCount].varKill.end(),hTable[loadCount].name);
-                        errs() << formatv("{0,-40}", inst) << "VARKILL: " << hTable[tableCount].name << "\n";
+                        blockCon[blockCount].varKill.insert(blockCon[blockCount].varKill.end(),hTable[tableCount].name);
                         varKillCount++;
                         tableCount++;
                         afterOp = false;
                     }else{
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         blockCon[blockCount].varKill.insert(blockCon[blockCount].varKill.end(),hTable[loadCount-2].name);
-                        errs() << formatv("{0,-40}", inst) << "UEVAR: " << hTable[loadCount-1].name << "\n";
-                        errs() << formatv("{0,-40}", inst) << "VARKILL: " << hTable[loadCount-2].name << "\n";
                         ueVarCount++;
                         varKillCount++;
                         tableCount++;
                     }
                 }
             }
+            sort(blockCon[blockCount].ueVar);
+            sort(blockCon[blockCount].varKill);
         }
 
 
 //////////////////////////////Implementing LiveOut//////////////////////////////
-        // for(int i=blockCount ; i > 0 ; i--){
-        //     if (first == true){
-        //         first == false;
-        //     }else{
 
-        //         blockCon[blockCount].liveOut =
-        //     }
-        //     // blockCon[blockCount].liveOut =
-
-        // }
-
-        errs() << "//////////////////////////////Implementing LiveOut//////////////////////////////" << "\n";
-        // std::vector<StringRef> v1; 
-        // std::vector<StringRef> v2 = {"3f", "4g", "5h", "6i", "7j"}; 
-        // std::vector<StringRef> dest1; // create a third vector to write results
-        // v1.insert(v1.end(),"concac");
-        // v1.insert(v1.end(),"vkl");
-        // std::set_union(v1.begin(), v1.end(), v2.begin(), v2.end(),std::back_inserter(dest1));
-        // for(int i=0 ; i < 8; i++){
-        //     errs() << "dest1    " << dest1[i] <<"\n";
-        // }
-
-        // for(int j = (blockCount-1); j >= 0; j--){
-        //     // errs() << "Succ " << Succ->getName()<<"\n";
-        //     errs() << "block " << blockCon[j].name<<"\n";
-        //     errs() << "\n";
-        // }
-
-        // int succLoop=0;
-        // errs() << blockCon[2].name << "\n";
-
-
-
-        errs() << "BLOCKCOUNT" <<blockCount << "\n";
         for (int i = blockCount-1; i >= 0; i--){
             for (BasicBlock *Succ : successors(blockCon[i].block)) {
                 for(int j = 0; j < blockCount+1; j++){
-                    // errs() << "Succ " << Succ->getName()<<"\n";
-                    // errs() << "block " << blockCon[j].name<<"\n";
-                    // errs() << "\n";
                     if (Succ == blockCon[j].block){
-                        std::vector<StringRef> kill_U_UE;
-                        std::set_union(blockCon[j].varKill.begin(), blockCon[j].varKill.end(), blockCon[j].ueVar.begin(), blockCon[j].ueVar.end(),std::back_inserter(kill_U_UE));
-                        // errs() << "print kill_U_UE" << "\n";
-                        // for (auto k: kill_U_UE){
-                        //     errs() << k << " ";
-                        // }
-                        std::vector<StringRef> out_diff;
-                        std::set_difference(blockCon[j].liveOut.begin(), blockCon[j].liveOut.end(), kill_U_UE.begin(), kill_U_UE.end(),std::back_inserter(out_diff));
-                        std::set_union(blockCon[i].liveOut.begin(), blockCon[i].liveOut.end(), out_diff.begin(), out_diff.end(),std::back_inserter(blockCon[i].liveOut));
+                        std::vector<StringRef> out_diff_kill;
+                        std::set_difference(blockCon[j].liveOut.begin(), blockCon[j].liveOut.end(), blockCon[j].varKill.begin(), blockCon[j].varKill.end(),std::back_inserter(out_diff_kill));
+                        std::vector<StringRef> U_AE;
+                        std::set_union(out_diff_kill.begin(), out_diff_kill.end(), blockCon[j].ueVar.begin(), blockCon[j].ueVar.end(),std::back_inserter(U_AE));
+                        std::set_union(blockCon[i].liveOut.begin(), blockCon[i].liveOut.end(), U_AE.begin(), U_AE.end(),std::back_inserter(blockCon[i].liveOut));
                     }
                 }
-                // errs() << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << "\n";
-                // errs() << "liveOut:   " << blockCon[i].liveOut << "\n";
             }
+            sort(blockCon[i].liveOut);
+            blockCon[i].liveOut.erase( unique( blockCon[i].liveOut.begin(), blockCon[i].liveOut.end() ), blockCon[i].liveOut.end() );
         }
-        // errs() << "liveOut:   " << blockCon[0].liveOut[0] << "\n";
 
-        // for (auto &basic_block : F)
-        // {
-        //     for (BasicBlock *Pred : predecessors(&basic_block)) {
 
-        //         errs() << basic_block << "\n";
-        //         errs() << Pred->getName() << "\n";
-        //         // for(int i=0 ; i < (sizeof(blockCon[blockCount].ueVar)/sizeof(blockCon[blockCount].ueVar[0])) ; i++){
-        //         //     if(blockCon[blockCount].ueVar[i] != ""){
-        //         //         errs() << "ueVar: " << blockCon[blockCount].ueVar[i] << "\n";
-        //         //     }
-        //         // }
-        //         // // errs() << "ueVar: " << blockCon[blockCount].ueVar << "\n";
-        //         // // errs() << "varKill: " << blockCon[blockCount].varKill << "\n";
-        //         // blockCount--;
-        //     }
-        // }
-        // for (int i = 0; i< blockCount-1;i++){
-        //         errs() << blockCon[i].name << " LiveOut: " << blockCon[i].liveOut[0] << "\n";
-        // }
+//////////////////////////////Printing Output//////////////////////////////
+
+        for(int i = 0; i < blockCount+1; i++){
+            errs()<<"-----"<< blockCon[i].name << "-----" << "\n";
+            errs()<<"UEVAR: ";
+            for(auto j: blockCon[i].ueVar){
+                errs()<< j << " ";
+            }
+            errs()<< "\n";
+            errs()<<"VARKILL: ";
+            for(auto k: blockCon[i].varKill){
+                errs()<< k << " ";
+            }
+            errs()<< "\n";
+            errs()<<"VARKILL: ";
+            for(auto l: blockCon[i].liveOut){
+                errs()<< l << " ";
+            }
+            errs()<< "\n";
+        }
 
 
 
@@ -206,34 +171,8 @@ namespace
         {
             for (auto &inst : basic_block)
             {
-
-                if (inst.getOpcode() == Instruction::Load)
-                {
-                }
-                if (inst.getOpcode() == Instruction::Store)
-                {
-                    
-                }
                 if (inst.isBinaryOp())
                 {
-                    if (inst.getOpcode() == Instruction::Add)
-                    {
-
-                    }
-                    if (inst.getOpcode() == Instruction::Mul)
-                    {
-
-                    }
-                    if (inst.getOpcode() == Instruction::Sub)
-                    {
-
-                    }
-                    if (inst.getOpcode() == Instruction::UDiv)
-                    {
-
-                    }
-
-
                     // see other classes, Instruction::Sub, Instruction::UDiv, Instruction::SDiv
                     // errs() << "Operand(0)" << (*inst.getOperand(0))<<"\n";
                     auto* ptr = dyn_cast<User>(&inst);
