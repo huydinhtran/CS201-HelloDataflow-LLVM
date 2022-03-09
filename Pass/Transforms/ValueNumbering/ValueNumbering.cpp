@@ -34,12 +34,12 @@ struct blockContent{
     llvm::BasicBlock* block;
     StringRef name;
     int blockId;
-    llvm::BasicBlock* succ[10];
+    llvm::BasicBlock* succ[1000];
 };
 
 
-struct table hTable[10];
-struct blockContent blockCon[10];
+struct table hTable[1000];
+struct blockContent blockCon[1000];
 int blockCount = -1;
 int loadCount = 0;
 int tableCount = loadCount;
@@ -55,7 +55,7 @@ namespace
     void visitor(Function &F)
     {
         // Here goes what you want to do with a pass
-        string func_name = "test1";
+        string func_name = "test3";
         errs() << "ValueNumbering: " << F.getName() << "\n";
 
 
@@ -95,6 +95,34 @@ namespace
                 if (inst.isBinaryOp())
                 {
                     if (inst.getOpcode() == Instruction::Add)
+                    {
+                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
+                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
+                        ueVarCount += 2;
+                        afterOp = true;
+                    }
+                    if (inst.getOpcode() == Instruction::Sub)
+                    {
+                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
+                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
+                        ueVarCount += 2;
+                        afterOp = true;
+                    }
+                    if (inst.getOpcode() == Instruction::Mul)
+                    {
+                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
+                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
+                        ueVarCount += 2;
+                        afterOp = true;
+                    }
+                    if (inst.getOpcode() == Instruction::UDiv)
+                    {
+                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
+                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
+                        ueVarCount += 2;
+                        afterOp = true;
+                    }
+                    if (inst.getOpcode() == Instruction::SDiv)
                     {
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
