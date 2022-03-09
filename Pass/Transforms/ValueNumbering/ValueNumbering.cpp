@@ -55,7 +55,7 @@ namespace
     void visitor(Function &F)
     {
         // Here goes what you want to do with a pass
-        string func_name = "test";
+        string func_name = "test1";
         errs() << "ValueNumbering: " << F.getName() << "\n";
 
 
@@ -135,9 +135,9 @@ namespace
                     if (Succ == blockCon[j].block){
                         std::vector<StringRef> out_diff_kill;
                         std::set_difference(blockCon[j].liveOut.begin(), blockCon[j].liveOut.end(), blockCon[j].varKill.begin(), blockCon[j].varKill.end(),std::back_inserter(out_diff_kill));
-                        std::vector<StringRef> U_AE;
-                        std::set_union(out_diff_kill.begin(), out_diff_kill.end(), blockCon[j].ueVar.begin(), blockCon[j].ueVar.end(),std::back_inserter(U_AE));
-                        std::set_union(blockCon[i].liveOut.begin(), blockCon[i].liveOut.end(), U_AE.begin(), U_AE.end(),std::back_inserter(blockCon[i].liveOut));
+                        std::vector<StringRef> U_UE;
+                        std::set_union(out_diff_kill.begin(), out_diff_kill.end(), blockCon[j].ueVar.begin(), blockCon[j].ueVar.end(),std::back_inserter(U_UE));
+                        std::set_union(blockCon[i].liveOut.begin(), blockCon[i].liveOut.end(), U_UE.begin(), U_UE.end(),std::back_inserter(blockCon[i].liveOut));
                     }
                 }
             }
