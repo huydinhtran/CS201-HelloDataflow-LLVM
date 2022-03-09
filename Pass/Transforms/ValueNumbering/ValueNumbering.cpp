@@ -55,7 +55,7 @@ namespace
     void visitor(Function &F)
     {
         // Here goes what you want to do with a pass
-        string func_name = "test1";
+        string func_name = "test";
         errs() << "ValueNumbering: " << F.getName() << "\n";
 
 
@@ -160,7 +160,7 @@ namespace
                 errs()<< k << " ";
             }
             errs()<< "\n";
-            errs()<<"VARKILL: ";
+            errs()<<"LIVEOUT: ";
             for(auto l: blockCon[i].liveOut){
                 errs()<< l << " ";
             }
