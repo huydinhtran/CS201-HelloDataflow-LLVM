@@ -55,7 +55,7 @@ namespace
     void visitor(Function &F)
     {
         // Here goes what you want to do with a pass
-        string func_name = "test";
+        string func_name = "test1";
         errs() << "ValueNumbering: " << F.getName() << "\n";
 
 
@@ -121,7 +121,9 @@ namespace
                 }
             }
             sort(blockCon[blockCount].ueVar);
+            blockCon[blockCount].ueVar.erase( unique( blockCon[blockCount].ueVar.begin(), blockCon[blockCount].ueVar.end() ), blockCon[blockCount].ueVar.end() );
             sort(blockCon[blockCount].varKill);
+            blockCon[blockCount].varKill.erase( unique( blockCon[blockCount].varKill.begin(), blockCon[blockCount].varKill.end() ), blockCon[blockCount].varKill.end() );
         }
 
 
