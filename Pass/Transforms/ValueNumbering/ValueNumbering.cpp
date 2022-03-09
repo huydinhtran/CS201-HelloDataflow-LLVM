@@ -55,8 +55,8 @@ namespace
     void visitor(Function &F)
     {
         // Here goes what you want to do with a pass
-        string func_name = "test3";
-        errs() << "ValueNumbering: " << F.getName() << "\n";
+        string func_name = "test";
+        errs() << "Liveness Analysis: " << F.getName() << "\n";
 
 
         // Comment this line
@@ -96,6 +96,9 @@ namespace
                 {
                     if (inst.getOpcode() == Instruction::Add)
                     {
+                        //errs() << "blockConEnd " << blockCon[blockCount].ueVar<<"\n" ;
+                        //errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
+
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;
@@ -103,6 +106,7 @@ namespace
                     }
                     if (inst.getOpcode() == Instruction::Sub)
                     {
+                        errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;
@@ -110,6 +114,7 @@ namespace
                     }
                     if (inst.getOpcode() == Instruction::Mul)
                     {
+                        errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;
@@ -117,6 +122,7 @@ namespace
                     }
                     if (inst.getOpcode() == Instruction::UDiv)
                     {
+                        errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;
@@ -124,6 +130,7 @@ namespace
                     }
                     if (inst.getOpcode() == Instruction::SDiv)
                     {
+                        errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;

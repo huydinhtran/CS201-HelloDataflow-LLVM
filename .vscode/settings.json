@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.ejs": "html",
+        "set": "cpp",
+        "string": "cpp",
+        "vector": "cpp"
+    }
+}

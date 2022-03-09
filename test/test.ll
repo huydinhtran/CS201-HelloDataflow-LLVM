@@ -1,10 +1,10 @@
 ; ModuleID = 'test.c'
 source_filename = "test.c"
-target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
-target triple = "x86_64-pc-linux-gnu"
+target datalayout = "e-m:o-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-apple-macosx12.0.0"
 
-; Function Attrs: noinline nounwind optnone uwtable
-define dso_local void @test() #0 {
+; Function Attrs: noinline nounwind optnone ssp uwtable
+define void @test() #0 {
 entry:
   %a = alloca i32, align 4
   %b = alloca i32, align 4
@@ -38,10 +38,13 @@ if.end:                                           ; preds = %if.else, %if.then
   ret void
 }
 
-attributes #0 = { noinline nounwind optnone uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="all" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #0 = { noinline nounwind optnone ssp uwtable "frame-pointer"="all" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="penryn" "target-features"="+cx16,+cx8,+fxsr,+mmx,+sahf,+sse,+sse2,+sse3,+sse4.1,+ssse3,+x87" "tune-cpu"="generic" }
 
-!llvm.module.flags = !{!0}
-!llvm.ident = !{!1}
+!llvm.module.flags = !{!0, !1, !2, !3}
+!llvm.ident = !{!4}
 
 !0 = !{i32 1, !"wchar_size", i32 4}
-!1 = !{!"clang version 10.0.0-4ubuntu1 "}
+!1 = !{i32 7, !"PIC Level", i32 2}
+!2 = !{i32 7, !"uwtable", i32 1}
+!3 = !{i32 7, !"frame-pointer", i32 2}
+!4 = !{!"Homebrew clang version 13.0.1"}
