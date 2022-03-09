@@ -55,7 +55,7 @@ namespace
     void visitor(Function &F)
     {
         // Here goes what you want to do with a pass
-        string func_name = "test";
+        string func_name = "test1";
         errs() << "Liveness Analysis: " << F.getName() << "\n";
 
 
@@ -81,15 +81,36 @@ namespace
                 StringRef var2Name = inst.getOperand(1)->getName();
                 loadFound = false;
 
-
+                //errs() <<"Var1 " << var1Name << "\n" ;
+                //errs()<<"Var2 "<< var2Name<<"\n";
+                //errs() << "Constant "<< (var1)->getValueID()<< "\n";
                 if (inst.getOpcode() == Instruction::Load)
                 {
 
                     if (loadFound == false){
+                        // errs() << "Loading " << var1->getName()<<"\n";
                         hTable[loadCount].var = var1;
                         hTable[loadCount].loadReg = loadCount;
                         hTable[loadCount].name = var1Name;
                         loadCount++;
+                    }
+                }
+                if (inst.getOpcode() == Instruction::Store)
+                {
+                    if(afterOp == true){
+                        // errs() << "Storing " << var2->getName()<<"\n";
+                        hTable[tableCount].var = var2;
+                        hTable[tableCount].name = var2Name;
+                        blockCon[blockCount].varKill.insert(blockCon[blockCount].varKill.end(),hTable[tableCount].name);
+                        varKillCount++;
+                        tableCount++;
+                        afterOp = false;
+                    }else{
+                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
+                        blockCon[blockCount].varKill.insert(blockCon[blockCount].varKill.end(),hTable[loadCount-2].name);
+                        ueVarCount++;
+                        varKillCount++;
+                        tableCount++;
                     }
                 }
                 if (inst.isBinaryOp())
@@ -137,23 +158,7 @@ namespace
                         afterOp = true;
                     }
                 }
-                if (inst.getOpcode() == Instruction::Store)
-                {
-                    if(afterOp == true){
-                        hTable[tableCount].var = var2;
-                        hTable[tableCount].name = var2Name;
-                        blockCon[blockCount].varKill.insert(blockCon[blockCount].varKill.end(),hTable[tableCount].name);
-                        varKillCount++;
-                        tableCount++;
-                        afterOp = false;
-                    }else{
-                        blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
-                        blockCon[blockCount].varKill.insert(blockCon[blockCount].varKill.end(),hTable[loadCount-2].name);
-                        ueVarCount++;
-                        varKillCount++;
-                        tableCount++;
-                    }
-                }
+                
             }
             sort(blockCon[blockCount].ueVar);
             blockCon[blockCount].ueVar.erase( unique( blockCon[blockCount].ueVar.begin(), blockCon[blockCount].ueVar.end() ), blockCon[blockCount].ueVar.end() );
