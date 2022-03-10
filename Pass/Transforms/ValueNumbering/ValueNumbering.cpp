@@ -21,13 +21,13 @@ using namespace std;
 
 using namespace llvm;
 
-struct table{
+struct table{                          //hash table that keeps tracks of variable with its respective alphabet names and load registers
     llvm::Value* var;
     int loadReg;
     StringRef name;
 };
 
-struct blockContent{
+struct blockContent{                   //storing block content such as liveOut, ueVar, varKill, block address, block name, block id, and all successors
     std::vector<StringRef> liveOut;
     std::vector<StringRef> ueVar;
     std::vector<StringRef> varKill;
@@ -40,13 +40,12 @@ struct blockContent{
 
 struct table hTable[1000];
 struct blockContent blockCon[1000];
-int blockCount = -1;
-int loadCount = 0;
-int tableCount = loadCount;
-int ueVarCount = 0;
-int varKillCount = 0;
-bool loadFound = false;
-bool afterOp = false;
+int blockCount = -1;                   //counting total number of blocks
+int loadCount = 0;                     //counting for load register and total number of load instructions
+int tableCount = loadCount;            //counting the number of entries in the hash table 
+int ueVarCount = 0;                    //counting number of ueVar of a block
+int varKillCount = 0;                  //counting number of varKill of a block
+bool afterOp = false;                  //for store instruction to determine whether if the store is after operation or load instruction
 
 
 namespace
@@ -55,7 +54,7 @@ namespace
     void visitor(Function &F)
     {
         // Here goes what you want to do with a pass
-        string func_name = "test1";
+        string func_name = "test";
         errs() << "Liveness Analysis: " << F.getName() << "\n";
 
 
@@ -64,7 +63,10 @@ namespace
             return;
 
 //////////////////////////////Implementing UEVar, VarKill//////////////////////////////
-
+/*
+Going through blocks by blocks and instructions by instructions, generating UEVar and Varkill 
+of each blocks by tracking and storing information in blockCon and hTable. 
+*/
         for (auto &basic_block : F)
         {
             blockCount++;
@@ -79,26 +81,18 @@ namespace
                 StringRef var1Name = inst.getOperand(0)->getName(); 
                 llvm::Value* var2 = inst.getOperand(1);
                 StringRef var2Name = inst.getOperand(1)->getName();
-                loadFound = false;
 
-                //errs() <<"Var1 " << var1Name << "\n" ;
-                //errs()<<"Var2 "<< var2Name<<"\n";
-                //errs() << "Constant "<< (var1)->getValueID()<< "\n";
                 if (inst.getOpcode() == Instruction::Load)
                 {
 
-                    if (loadFound == false){
-                        // errs() << "Loading " << var1->getName()<<"\n";
-                        hTable[loadCount].var = var1;
-                        hTable[loadCount].loadReg = loadCount;
-                        hTable[loadCount].name = var1Name;
-                        loadCount++;
-                    }
+                    hTable[loadCount].var = var1;
+                    hTable[loadCount].loadReg = loadCount;
+                    hTable[loadCount].name = var1Name;
+                    loadCount++;
                 }
                 if (inst.getOpcode() == Instruction::Store)
                 {
                     if(afterOp == true){
-                        // errs() << "Storing " << var2->getName()<<"\n";
                         hTable[tableCount].var = var2;
                         hTable[tableCount].name = var2Name;
                         blockCon[blockCount].varKill.insert(blockCon[blockCount].varKill.end(),hTable[tableCount].name);
@@ -117,9 +111,6 @@ namespace
                 {
                     if (inst.getOpcode() == Instruction::Add)
                     {
-                        //errs() << "blockConEnd " << blockCon[blockCount].ueVar<<"\n" ;
-                        //errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
-
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;
@@ -127,7 +118,6 @@ namespace
                     }
                     if (inst.getOpcode() == Instruction::Sub)
                     {
-                        errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;
@@ -135,7 +125,6 @@ namespace
                     }
                     if (inst.getOpcode() == Instruction::Mul)
                     {
-                        errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;
@@ -143,7 +132,6 @@ namespace
                     }
                     if (inst.getOpcode() == Instruction::UDiv)
                     {
-                        errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;
@@ -151,7 +139,6 @@ namespace
                     }
                     if (inst.getOpcode() == Instruction::SDiv)
                     {
-                        errs() << "hTable " <<hTable[loadCount-1].name<<"\n" ;
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-2].name);
                         blockCon[blockCount].ueVar.insert(blockCon[blockCount].ueVar.end(),hTable[loadCount-1].name);
                         ueVarCount += 2;
@@ -160,6 +147,9 @@ namespace
                 }
                 
             }
+            std::vector<StringRef> ueVar_diff_varKill;
+            std::set_difference(blockCon[blockCount].ueVar.begin(), blockCon[blockCount].ueVar.end(), blockCon[blockCount].varKill.begin(), blockCon[blockCount].varKill.end(),std::back_inserter(ueVar_diff_varKill));
+            blockCon[blockCount].ueVar = ueVar_diff_varKill;
             sort(blockCon[blockCount].ueVar);
             blockCon[blockCount].ueVar.erase( unique( blockCon[blockCount].ueVar.begin(), blockCon[blockCount].ueVar.end() ), blockCon[blockCount].ueVar.end() );
             sort(blockCon[blockCount].varKill);
@@ -168,7 +158,13 @@ namespace
 
 
 //////////////////////////////Implementing LiveOut//////////////////////////////
-
+/*
+3 totals loops to calculate liveOut.
+1st loop: loop backward from 2nd last block since the last block's liveOut will always be nothing.
+2nd loop: loop through the successor blocks of the chosen block
+3rd loop: finding the successor blocks information of UEVar and VarKill within the blockCon
+Erase any duplication within the liveOut 
+*/
         for (int i = blockCount-1; i >= 0; i--){
             for (BasicBlock *Succ : successors(blockCon[i].block)) {
                 for(int j = 0; j < blockCount+1; j++){
@@ -206,30 +202,11 @@ namespace
             }
             errs()<< "\n";
         }
-
-
-
-        for (auto &basic_block : F)
-        {
-            for (auto &inst : basic_block)
-            {
-                if (inst.isBinaryOp())
-                {
-                    // see other classes, Instruction::Sub, Instruction::UDiv, Instruction::SDiv
-                    // errs() << "Operand(0)" << (*inst.getOperand(0))<<"\n";
-                    auto* ptr = dyn_cast<User>(&inst);
-                    //errs() << "\t" << *ptr << "\n";
-                    for (auto it = ptr->op_begin(); it != ptr->op_end(); ++it)
-                    {
-                        errs() << "\t" << *(*it) << "\n";
-                        // llvm::User* instr = dyn_cast<User>(it); 
-                        // if ((*it)->hasName())
-                        // errs() << (*it)->getName() << "\n";
-                    }
-                } // end if
-            }     // end for inst
-        }         // end for block
+        
     }
+
+
+
 
     // New PM implementation
     struct ValueNumberingPass : public PassInfoMixin<ValueNumberingPass>
