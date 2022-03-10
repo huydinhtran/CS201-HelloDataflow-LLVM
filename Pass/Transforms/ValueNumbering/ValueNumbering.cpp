@@ -147,9 +147,6 @@ of each blocks by tracking and storing information in blockCon and hTable.
                 }
                 
             }
-            std::vector<StringRef> ueVar_diff_varKill;
-            std::set_difference(blockCon[blockCount].ueVar.begin(), blockCon[blockCount].ueVar.end(), blockCon[blockCount].varKill.begin(), blockCon[blockCount].varKill.end(),std::back_inserter(ueVar_diff_varKill));
-            blockCon[blockCount].ueVar = ueVar_diff_varKill;
             sort(blockCon[blockCount].ueVar);
             blockCon[blockCount].ueVar.erase( unique( blockCon[blockCount].ueVar.begin(), blockCon[blockCount].ueVar.end() ), blockCon[blockCount].ueVar.end() );
             sort(blockCon[blockCount].varKill);
